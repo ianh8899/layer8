@@ -233,3 +233,5 @@ export const dataModels = [
     ],
   },
 ] as const satisfies readonly I_DataModel[];
+
+export const DATA_MODEL_NAMES = dataModels.map((model) => model.name);
