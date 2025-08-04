@@ -1,10 +1,32 @@
-import { Button } from "@/components/ui/button";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Dashboard } from "./pages/Dashboard";
+import { Configuration } from "./pages/Configuration";
+import { SyncActivity } from "./pages/SyncActivity";
 
 function App() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button>Click me</Button>
-    </div>
+    <BrowserRouter>
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "calc(var(--spacing) * 72)",
+            "--header-height": "calc(var(--spacing) * 12)",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar variant="inset" />
+        <SidebarInset>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/configuration" element={<Configuration />} />
+            <Route path="/syncactivity" element={<SyncActivity />} />
+          </Routes>
+        </SidebarInset>
+      </SidebarProvider>
+    </BrowserRouter>
   );
 }
 
