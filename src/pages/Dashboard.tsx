@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { getIntegrations } from "@/lib/mock-api";
 import { type I_Integration } from "@/lib/db";
-import { SectionCards } from "@/components/dashboard-cards";
-import { SiteHeader } from "@/components/site-header";
+import { SectionCards } from "@/components/dashboard/dashboard-cards";
+import { SiteHeader } from "@/components/shadcn-shared/site-header";
 
 export function Dashboard() {
   const [integrations, setIntegrations] = useState<I_Integration[]>([]);

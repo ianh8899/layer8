@@ -7,8 +7,8 @@ import {
   IconListDetails,
 } from "@tabler/icons-react";
 
-import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
+import { NavMain } from "@/components/shadcn-shared/nav-main";
+import { NavUser } from "@/components/shadcn-shared/nav-user";
 import {
   Sidebar,
   SidebarContent,

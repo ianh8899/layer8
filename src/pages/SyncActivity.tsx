@@ -1,7 +1,7 @@
-import { DataTable } from "@/components/data-table";
+import { DataTable } from "@/components/shadcn-shared/data-table";
 
 import data from "../app/dashboard/data.json";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/shadcn-shared/site-header";
 
 export function SyncActivity() {
   return (

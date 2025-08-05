@@ -2,8 +2,8 @@ import { useState } from "react";
 import { type I_Integration, STATUS } from "@/lib/db";
 
 import { Card, CardHeader } from "@/components/ui/card";
-import { DashboardStats } from "@/components/dashboard-stats";
-import { IntegrationCards } from "@/components/integration-cards";
+import { DashboardStats } from "@/components/dashboard/dashboard-stats";
+import { IntegrationCards } from "@/components/dashboard/integration-cards";
 
 interface SectionCardsProps {
   integrations: I_Integration[];

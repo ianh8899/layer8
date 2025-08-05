@@ -1,5 +1,5 @@
-import { SiteHeader } from "@/components/site-header";
-import { ConfigurationForm } from "@/components/configuration-form";
+import { SiteHeader } from "@/components/shadcn-shared/site-header";
+import { ConfigurationForm } from "@/components/configuration/configuration-form";
 import type { I_Integration } from "@/lib/db";
 import { useLocation } from "react-router-dom";
 
