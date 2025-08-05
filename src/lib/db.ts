@@ -42,6 +42,14 @@ export const INTEGRATION_STATUSES = [
   "error",
   "pending",
 ] as const;
+
+export const STATUS = {
+  ACTIVE: INTEGRATION_STATUSES[0],
+  INACTIVE: INTEGRATION_STATUSES[1],
+  ERROR: INTEGRATION_STATUSES[2],
+  PENDING: INTEGRATION_STATUSES[3],
+} as const;
+
 export const SYNC_DIRECTIONS = [
   "bidirectional",
   "layer8-to-external",
