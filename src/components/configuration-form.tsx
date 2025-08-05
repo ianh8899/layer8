@@ -1,14 +1,17 @@
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { useState } from "react";
 import {
   integrationTypes,
   SYNC_DIRECTIONS,
   SYNC_FREQUENCIES,
   AUTH_TYPES,
+  DATA_MODEL_NAMES,
   type I_Integration,
   type T_AuthType,
   type T_SyncDirection,
   type T_SyncFrequency,
+  type DataModelName,
+  dataModels,
 } from "@/lib/db";
 import { addIntegration } from "@/lib/mock-api";
 import { Button } from "@/components/ui/button";
@@ -30,6 +33,10 @@ type FormData = {
   authType: T_AuthType;
   syncDirection: T_SyncDirection;
   syncFrequency: T_SyncFrequency;
+  dataMapping: {
+    layer8Model: string;
+    externalEntity: string;
+  }[];
 };
 
 export function ConfigurationForm() {
@@ -42,18 +49,43 @@ export function ConfigurationForm() {
     control,
     watch,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    defaultValues: {
+      dataMapping: [{ layer8Model: "", externalEntity: "" }],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "dataMapping",
+  });
 
   const selectedType = watch("type");
   const selectedIntegrationType = integrationTypes.find(
     (t) => t.id === selectedType
   );
 
+  // Get available data models for the selected integration type
+  const availableDataModels =
+    selectedIntegrationType?.dataModels || DATA_MODEL_NAMES;
+
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     setSubmitMessage("");
 
     try {
+      // Convert dataMapping array to object
+      const dataMappingObject = data.dataMapping.reduce((acc, mapping) => {
+        if (
+          mapping.layer8Model &&
+          mapping.externalEntity &&
+          (DATA_MODEL_NAMES as readonly string[]).includes(mapping.layer8Model)
+        ) {
+          acc[mapping.layer8Model as DataModelName] = mapping.externalEntity;
+        }
+        return acc;
+      }, {} as Record<DataModelName, string>);
+
       const newIntegration: I_Integration = {
         id: `int-${Date.now()}`,
         name: data.name,
@@ -68,7 +100,7 @@ export function ConfigurationForm() {
         configuration: {
           endpoint: data.endpoint,
           authType: data.authType,
-          dataMapping: {},
+          dataMapping: dataMappingObject,
         },
       };
 
@@ -265,6 +297,97 @@ export function ConfigurationForm() {
             </p>
           )}
         </div>
+
+        {/* Data Mapping Section */}
+        {selectedIntegrationType && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>Data Mapping</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ layer8Model: "", externalEntity: "" })}
+              >
+                Add Mapping
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {fields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="flex items-center gap-3 p-3 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <Label
+                      htmlFor={`dataMapping.${index}.layer8Model`}
+                      className="text-sm"
+                    >
+                      Layer8 Data Model
+                    </Label>
+                    <Controller
+                      name={`dataMapping.${index}.layer8Model`}
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select data model" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableDataModels.map((modelName) => {
+                              const model = dataModels.find(
+                                (m) => m.name === modelName
+                              );
+                              return (
+                                <SelectItem key={modelName} value={modelName}>
+                                  {model?.displayName || modelName}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <Label
+                      htmlFor={`dataMapping.${index}.externalEntity`}
+                      className="text-sm"
+                    >
+                      External System Entity
+                    </Label>
+                    <Input
+                      {...register(`dataMapping.${index}.externalEntity`)}
+                      placeholder="e.g., Account, User, Ticket"
+                    />
+                  </div>
+
+                  {fields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => remove(index)}
+                      className="mt-6"
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <p className="text-sm text-gray-600">
+              Map your Layer8 data models to the corresponding entities in the
+              external system.
+            </p>
+          </div>
+        )}
 
         {/* Submit Button */}
         <div className="flex flex-col space-y-4">

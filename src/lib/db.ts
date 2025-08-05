@@ -65,7 +65,7 @@ export type T_SyncFrequency = (typeof SYNC_FREQUENCIES)[number];
 export type T_IntegrationConfiguration = {
   endpoint: string;
   authType: T_AuthType;
-  dataMapping: Record<string, string>;
+  dataMapping: Partial<Record<DataModelName, string>>;
 };
 
 export interface I_Integration {
@@ -234,4 +234,6 @@ export const dataModels = [
   },
 ] as const satisfies readonly I_DataModel[];
 
-export const DATA_MODEL_NAMES = dataModels.map((model) => model.name);
+export const DATA_MODEL_NAMES = dataModels.map(
+  (model) => model.name
+) as DataModelName[];
