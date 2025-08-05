@@ -17,6 +17,21 @@ export const addIntegration = async (integration: I_Integration) => {
   return "Integration added successfully";
 };
 
+export const updateIntegration = async (integration: I_Integration) => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const index = integrations.findIndex((i) => i.id === integration.id);
+  if (index !== -1) {
+    integrations[index] = integration;
+    return "Integration updated successfully";
+  }
+  return `Couldn't update integration: Integration ${integration.id} not found`;
+};
+
+export const INTEGRATION_METHODS = [
+  "addIntegration",
+  "updateIntegration",
+] as const;
+
 export const addNewIntegrationType = async (type: I_IntegrationType) => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   integrationTypes.push(type);

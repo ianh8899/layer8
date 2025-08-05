@@ -13,7 +13,11 @@ import {
   type DataModelName,
   dataModels,
 } from "@/lib/db";
-import { addIntegration } from "@/lib/mock-api";
+import {
+  addIntegration,
+  updateIntegration,
+  INTEGRATION_METHODS,
+} from "@/lib/mock-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,9 +43,28 @@ type FormData = {
   }[];
 };
 
-export function ConfigurationForm() {
+export function ConfigurationForm({
+  integration = null,
+  submitType
+}: {
+  integration?: I_Integration | null;
+  submitType: (typeof INTEGRATION_METHODS)[number];
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
+
+  // Convert integration dataMapping object to array format for the form
+  const getDefaultDataMapping = () => {
+    if (integration?.configuration?.dataMapping) {
+      return Object.entries(integration.configuration.dataMapping).map(
+        ([layer8Model, externalEntity]) => ({
+          layer8Model,
+          externalEntity,
+        })
+      );
+    }
+    return [{ layer8Model: "", externalEntity: "" }];
+  };
 
   const {
     register,
@@ -51,7 +74,14 @@ export function ConfigurationForm() {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      dataMapping: [{ layer8Model: "", externalEntity: "" }],
+      name: integration?.name || "",
+      type: integration?.type || "",
+      system: integration?.system || "",
+      endpoint: integration?.configuration?.endpoint || "",
+      authType: integration?.configuration?.authType || ("" as T_AuthType),
+      syncDirection: integration?.syncDirection || ("" as T_SyncDirection),
+      syncFrequency: integration?.syncFrequency || ("" as T_SyncFrequency),
+      dataMapping: getDefaultDataMapping(),
     },
   });
 
@@ -87,16 +117,16 @@ export function ConfigurationForm() {
       }, {} as Record<DataModelName, string>);
 
       const newIntegration: I_Integration = {
-        id: `int-${Date.now()}`,
+        id: integration?.id || `int-${Date.now()}`,
         name: data.name,
         type: data.type,
         system: data.system,
-        status: "active",
-        lastSync: new Date().toISOString(),
+        status: integration?.status || "active",
+        lastSync: integration?.lastSync || new Date().toISOString(),
         syncFrequency: data.syncFrequency,
         syncDirection: data.syncDirection,
-        recordsCount: 0,
-        errorCount: 0,
+        recordsCount: integration?.recordsCount || 0,
+        errorCount: integration?.errorCount || 0,
         configuration: {
           endpoint: data.endpoint,
           authType: data.authType,
@@ -104,7 +134,10 @@ export function ConfigurationForm() {
         },
       };
 
-      const result = await addIntegration(newIntegration);
+      const submission =
+        submitType === "addIntegration" ? addIntegration : updateIntegration;
+
+      const result = await submission(newIntegration);
       setSubmitMessage(result);
     } catch (error) {
       setSubmitMessage("Failed to create integration: " + error);
@@ -115,7 +148,9 @@ export function ConfigurationForm() {
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 mx-14">
-      <h2 className="text-lg font-semibold">New Integration Configuration</h2>
+      <h2 className="text-lg font-semibold">
+        {integration ? "Edit Integration" : "New Integration Configuration"}
+      </h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
         {/* Integration Name */}
@@ -392,7 +427,10 @@ export function ConfigurationForm() {
         {/* Submit Button */}
         <div className="flex flex-col space-y-4">
           <Button type="submit" disabled={isSubmitting} className="w-fit">
-            {isSubmitting ? "Creating Integration..." : "Create Integration"}
+            {isSubmitting 
+              ? (integration ? "Updating Integration..." : "Creating Integration...")
+              : (integration ? "Update Integration" : "Create Integration")
+            }
           </Button>
 
           {submitMessage && (
