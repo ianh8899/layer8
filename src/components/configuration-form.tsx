@@ -1,5 +1,6 @@
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   integrationTypes,
   SYNC_DIRECTIONS,
@@ -45,11 +46,12 @@ type FormData = {
 
 export function ConfigurationForm({
   integration = null,
-  submitType
+  submitType,
 }: {
   integration?: I_Integration | null;
   submitType: (typeof INTEGRATION_METHODS)[number];
 }) {
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
 
@@ -139,6 +141,12 @@ export function ConfigurationForm({
 
       const result = await submission(newIntegration);
       setSubmitMessage(result);
+
+      if (result.includes("successfully")) {
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
+      }
     } catch (error) {
       setSubmitMessage("Failed to create integration: " + error);
     } finally {
@@ -426,12 +434,25 @@ export function ConfigurationForm({
 
         {/* Submit Button */}
         <div className="flex flex-col space-y-4">
-          <Button type="submit" disabled={isSubmitting} className="w-fit">
-            {isSubmitting 
-              ? (integration ? "Updating Integration..." : "Creating Integration...")
-              : (integration ? "Update Integration" : "Create Integration")
-            }
-          </Button>
+          <div className="flex gap-3">
+            <Button type="submit" disabled={isSubmitting} className="w-fit">
+              {isSubmitting
+                ? integration
+                  ? "Updating Integration..."
+                  : "Creating Integration..."
+                : integration
+                ? "Update Integration"
+                : "Create Integration"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/dashboard")}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+          </div>
 
           {submitMessage && (
             <p

@@ -4,6 +4,7 @@ import {
   IconClock,
   IconX,
   IconFilter,
+  IconEdit,
 } from "@tabler/icons-react";
 import {
   type I_Integration,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/db";
 import { manualSync, updateStatus } from "@/lib/mock-api";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,6 +54,7 @@ export function IntegrationCards({
   updatingStatus,
   setUpdatingStatus,
 }: IntegrationCardsProps) {
+  const navigate = useNavigate();
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterError, setFilterError] = useState<string>("all");
@@ -117,6 +120,10 @@ export function IntegrationCards({
     } finally {
       setUpdatingStatus(null);
     }
+  };
+
+  const handleEditIntegration = (integration: I_Integration) => {
+    navigate("/configuration", { state: { integration } });
   };
 
   return (
@@ -276,23 +283,33 @@ export function IntegrationCards({
                   Last sync:{" "}
                   {new Date(integration.lastSync).toLocaleDateString()}
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleManualSync(integration.id)}
-                  disabled={
-                    syncing === integration.id ||
-                    updatingStatus === integration.id ||
-                    integration.status === STATUS.INACTIVE
-                  }
-                >
-                  {syncing === integration.id ? (
-                    <IconRefresh className="size-4 animate-spin" />
-                  ) : (
-                    <IconRefresh className="size-4" />
-                  )}
-                  Sync
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditIntegration(integration)}
+                  >
+                    <IconEdit className="size-4" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleManualSync(integration.id)}
+                    disabled={
+                      syncing === integration.id ||
+                      updatingStatus === integration.id ||
+                      integration.status === STATUS.INACTIVE
+                    }
+                  >
+                    {syncing === integration.id ? (
+                      <IconRefresh className="size-4 animate-spin" />
+                    ) : (
+                      <IconRefresh className="size-4" />
+                    )}
+                    Sync
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           ))
