@@ -63,6 +63,7 @@ export const manualSync = async (id: string) => {
         return `Manual sync failed for integration ${id} due to an error`;
       } else {
         integration.lastSync = new Date().toISOString();
+        integration.recordsCount += 1;
         integration.status = "active";
         return `Manual sync completed successfully for integration ${id}`;
       }
