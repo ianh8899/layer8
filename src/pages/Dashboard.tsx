@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { getIntegrations } from "@/lib/mock-api";
 import { type I_Integration } from "@/lib/db";
-import { SectionCards } from "@/components/section-cards";
+import { SectionCards } from "@/components/dashboard-cards";
 import { SiteHeader } from "@/components/site-header";
 
 export function Dashboard() {
