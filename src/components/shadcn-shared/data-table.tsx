@@ -51,6 +51,9 @@ import {
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useState } from "react";
+
+import { manualSync } from "@/lib/mock-api";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
@@ -129,197 +132,12 @@ function DragHandle({ id }: { id: string }) {
   );
 }
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
-  {
-    id: "drag",
-    header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
-  },
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => {
-      return <TableCellViewer item={row.original} />;
-    },
-    enableHiding: false,
-  },
-  {
-    accessorKey: "lastSync",
-    header: "Last Sync",
-    cell: ({ row }) => (
-      <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
-          {new Date(row.original.lastSync).toLocaleDateString()}
-        </Badge>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.original.status;
-      let badgeVariant: "outline" | "default" | "secondary" | "destructive" =
-        "outline";
-      let icon = null;
-      let iconClass = "";
-
-      if (status === "active") {
-        badgeVariant = "outline";
-        icon = (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400 mr-1" />
-        );
-        iconClass = "text-green-700 dark:text-green-300 border-green-500";
-      } else if (status === "inactive") {
-        badgeVariant = "outline";
-        icon = (
-          <IconCircleMinus className="text-gray-500 dark:text-gray-400 mr-1" />
-        );
-        iconClass = "text-gray-700 dark:text-gray-300 border-gray-500";
-      } else if (status === "error") {
-        badgeVariant = "outline";
-        icon = <IconCircleX className="text-red-500 dark:text-red-400 mr-1" />;
-        iconClass = "text-red-700 dark:text-red-300 border-red-500";
-      }
-
-      return (
-        <Badge variant={badgeVariant} className={`px-1.5 ${iconClass}`}>
-          {icon}
-          {status}
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "recordsCount",
-    header: () => <div className="">Records Count</div>,
-    cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.name}`,
-            success: "Done",
-            error: "Error",
-          });
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-recordsCount`} className="sr-only">
-          Records Count
-        </Label>
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.recordsCount.toString()}
-          id={`${row.original.id}-recordsCount`}
-        />
-      </form>
-    ),
-  },
-  {
-    accessorKey: "errorCount",
-    header: () => <div className="">Error Count</div>,
-    cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.name}`,
-            success: "Done",
-            error: "Error",
-          });
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-errorCount`} className="sr-only">
-          Error Count
-        </Label>
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.errorCount.toString()}
-          id={`${row.original.id}-errorCount`}
-        />
-      </form>
-    ),
-  },
-  {
-    id: "actions",
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem>Sync</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
-
-function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.original.id,
-  });
-
-  return (
-    <TableRow
-      data-state={row.getIsSelected() && "selected"}
-      data-dragging={isDragging}
-      ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition: transition,
-      }}
-    >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
-    </TableRow>
-  );
-}
-
 export function DataTable({
   data: initialData,
+  onDataChange,
 }: {
   data: z.infer<typeof schema>[];
+  onDataChange?: () => void;
 }) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -333,6 +151,7 @@ export function DataTable({
     pageIndex: 0,
     pageSize: 10,
   });
+  const [syncing, setSyncing] = useState<string | null>(null);
   const sortableId = React.useId();
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -344,6 +163,196 @@ export function DataTable({
     () => data?.map(({ id }) => id) || [],
     [data]
   );
+
+  const handleSync = async (integrationId: string) => {
+    setSyncing(integrationId);
+    try {
+      const result = await manualSync(integrationId);
+      toast.success(result);
+      onDataChange?.(); // Refresh data after sync
+    } catch (error) {
+      toast.error(
+        `Sync failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setSyncing(null);
+    }
+  };
+
+  const columns: ColumnDef<z.infer<typeof schema>>[] = [
+    {
+      id: "drag",
+      header: () => null,
+      cell: ({ row }) => <DragHandle id={row.original.id} />,
+    },
+    {
+      id: "select",
+      header: ({ table }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => {
+        return <TableCellViewer item={row.original} />;
+      },
+      enableHiding: false,
+    },
+    {
+      accessorKey: "lastSync",
+      header: "Last Sync",
+      cell: ({ row }) => (
+        <div className="w-32">
+          <Badge variant="outline" className="text-muted-foreground px-1.5">
+            {new Date(row.original.lastSync).toLocaleDateString()}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.original.status;
+        let badgeVariant: "outline" | "default" | "secondary" | "destructive" =
+          "outline";
+        let icon = null;
+        let iconClass = "";
+
+        if (status === "active") {
+          badgeVariant = "outline";
+          icon = (
+            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400 mr-1" />
+          );
+          iconClass = "text-green-700 dark:text-green-300 border-green-500";
+        } else if (status === "inactive") {
+          badgeVariant = "outline";
+          icon = (
+            <IconCircleMinus className="text-gray-500 dark:text-gray-400 mr-1" />
+          );
+          iconClass = "text-gray-700 dark:text-gray-300 border-gray-500";
+        } else if (status === "error") {
+          badgeVariant = "outline";
+          icon = (
+            <IconCircleX className="text-red-500 dark:text-red-400 mr-1" />
+          );
+          iconClass = "text-red-700 dark:text-red-300 border-red-500";
+        }
+
+        return (
+          <Badge variant={badgeVariant} className={`px-1.5 ${iconClass}`}>
+            {icon}
+            {status}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "recordsCount",
+      header: () => <div className="">Records Count</div>,
+      cell: ({ row }) => (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
+              loading: `Saving ${row.original.name}`,
+              success: "Done",
+              error: "Error",
+            });
+          }}
+        >
+          <Label
+            htmlFor={`${row.original.id}-recordsCount`}
+            className="sr-only"
+          >
+            Records Count
+          </Label>
+          <Input
+            className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent shadow-none focus-visible:border dark:bg-transparent"
+            defaultValue={row.original.recordsCount.toString()}
+            id={`${row.original.id}-recordsCount`}
+          />
+        </form>
+      ),
+    },
+    {
+      accessorKey: "errorCount",
+      header: () => <div className="">Error Count</div>,
+      cell: ({ row }) => (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
+              loading: `Saving ${row.original.name}`,
+              success: "Done",
+              error: "Error",
+            });
+          }}
+        >
+          <Label htmlFor={`${row.original.id}-errorCount`} className="sr-only">
+            Error Count
+          </Label>
+          <Input
+            className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent shadow-none focus-visible:border dark:bg-transparent"
+            defaultValue={row.original.errorCount.toString()}
+            id={`${row.original.id}-errorCount`}
+          />
+        </form>
+      ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+              size="icon"
+            >
+              <IconDotsVertical />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuItem
+              onClick={() => handleSync(row.original.id)}
+              disabled={syncing === row.original.id}
+            >
+              {syncing === row.original.id ? "Syncing..." : "Sync"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   const table = useReactTable({
     data,
@@ -379,6 +388,31 @@ export function DataTable({
         return arrayMove(data, oldIndex, newIndex);
       });
     }
+  }
+
+  function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
+    const { transform, transition, setNodeRef, isDragging } = useSortable({
+      id: row.original.id,
+    });
+
+    return (
+      <TableRow
+        data-state={row.getIsSelected() && "selected"}
+        data-dragging={isDragging}
+        ref={setNodeRef}
+        className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
+        style={{
+          transform: CSS.Transform.toString(transform),
+          transition: transition,
+        }}
+      >
+        {row.getVisibleCells().map((cell) => (
+          <TableCell key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        ))}
+      </TableRow>
+    );
   }
 
   return (

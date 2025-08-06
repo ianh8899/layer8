@@ -44,7 +44,7 @@ export function SyncActivity() {
             {loading ? (
               <SyncActivitySkeleton />
             ) : (
-              <DataTable data={tableData} />
+              <DataTable data={tableData} onDataChange={fetchIntegrations} />
             )}
           </div>
         </div>
