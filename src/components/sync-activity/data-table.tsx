@@ -80,7 +80,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -327,6 +326,7 @@ export function DataTable({
     },
     {
       id: "actions",
+      header: () => <div className="">Actions</div>,
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -346,8 +346,6 @@ export function DataTable({
             >
               {syncing === row.original.id ? "Syncing..." : "Sync"}
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
