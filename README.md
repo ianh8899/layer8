@@ -1,69 +1,65 @@
-# React + TypeScript + Vite
+# Layer8 Integration Framework - Technical Challenge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Getting Started
 
-Currently, two official plugins are available:
+```bash
+# Install dependencies
+npm install
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Appication served on `http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Project Structure
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Pages
+
+- **`/pages`** - Main application pages and route components
+  - `Dashboard.tsx` - Overview of integrations with filtering and management
+  - `Configuration.tsx` - Create new and update current integrations
+  - `SyncActivity.tsx` - Table view of sync activity
+
+### Components
+
+- **`/components/dashboard`** - Dashboard-specific components (integration cards, stats)
+- **`/components/configuration`** - Configuration form components
+- **`/components/sync-activity`** - Data table and sync-related components
+- **`/components/shadcn-shared`** - Shared UI components (sidebar, navigation, data tables)
+- **`/components/ui`** - Base shadcn/ui component library
+
+### API & Data
+
+- **`/lib`** - Core application logic and data layer
+  - `db.ts` - Data, schemas and type definitions
+  - `mock-api.ts` - Mock API functions for demo purposes
+  - `utils.ts` - Shadcn utility functions and helpers
+
+## Technology Stack
+
+### UI Framework
+
+- **shadcn/ui** - Primary component library
+  - **Why**: Free and open source (FOSS)
+  - **Why**: Modern, accessible design system
+  - **Why**: Full source code provided for customization
+  - **Why**: Built on Radix UI primitives for accessibility
+
+### Styling
+
+- **Tailwind CSS** - Utility-first CSS framework
+  - **Why**: Required prerequisite for shadcn/ui
+  - **Why**: Consistent design system enforcement
+
+### Core Stack
+
+- **React** with TypeScript
+- **React Router** for client-side navigation
+- **React Hook Form** for form handling
+
+## Assumptions
+
+### Database Schema
+
+The application's data structure and schema are derived from the mock database definitions in `/lib/db.ts`. The `I_Integration` interface serves as the primary data model, based upon the brief given. No new data models created.
