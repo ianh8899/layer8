@@ -6,6 +6,9 @@
 # Install dependencies
 npm install
 
+# Run tests
+npm run test
+
 # Start development server
 npm run dev
 ```
@@ -57,6 +60,7 @@ Appication served on `http://localhost:5173`
 - **React** with TypeScript
 - **React Router** for client-side navigation
 - **React Hook Form** for form handling
+- **Jest** for testing
 
 ## Assumptions
 
