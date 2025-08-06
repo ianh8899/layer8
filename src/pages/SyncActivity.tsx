@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/shadcn-shared/data-table";
+import { DataTable } from "@/components/sync-activity/data-table";
 import { useState, useEffect } from "react";
 import { getIntegrations } from "@/lib/mock-api";
 import { type I_Integration } from "@/lib/db";
